@@ -22,13 +22,13 @@ if (Platform.OS !== 'web') {
 
 // Firebase project configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDRfs7x6HmWPGiSWCWz2LaTJKAqdvZ9AMc",
-    authDomain: "juntadas-73888.firebaseapp.com",
-    projectId: "juntadas-73888",
-    storageBucket: "juntadas-73888.firebasestorage.app",
-    messagingSenderId: "1028462492534",
-    appId: "1:1028462492534:web:22cc6f65b12ecdb4a79857",
-    measurementId: "G-L1KB03WYR7"
+    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
