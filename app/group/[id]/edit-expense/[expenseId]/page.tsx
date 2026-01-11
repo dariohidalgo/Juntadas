@@ -1,7 +1,7 @@
 import EditExpenseClient from "./EditExpenseClient";
 
 export async function generateStaticParams() {
-    return [];
+    return [{ id: 'dummy', expenseId: 'dummy' }];
 }
 
 export default function Page() {

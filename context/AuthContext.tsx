@@ -1,8 +1,10 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, googleProvider, db } from "@/lib/firebase";
-import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import { onAuthStateChanged, signInWithPopup, signInWithCredential, GoogleAuthProvider, signOut } from "firebase/auth";
 import { doc, setDoc, getDocs, collection, query, where, deleteDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
+import { Capacitor } from "@capacitor/core";
 
 const AuthContext = createContext<any>(null);
 
@@ -58,7 +60,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const loginWithGoogle = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
+            if (Capacitor.isNativePlatform()) {
+                // Mobile: Use native Google Sign-In
+                const result = await FirebaseAuthentication.signInWithGoogle();
+
+                // Create credential and sign in to Firebase
+                const credential = GoogleAuthProvider.credential(result.credential?.idToken);
+                await signInWithCredential(auth, credential);
+            } else {
+                // Web: Use popup
+                await signInWithPopup(auth, googleProvider);
+            }
         } catch (error) {
             console.error("Login failed", error);
         }

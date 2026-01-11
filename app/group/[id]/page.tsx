@@ -1,7 +1,7 @@
 import GroupDetailsClient from "./GroupDetailsClient";
 
 export async function generateStaticParams() {
-    return [];
+    return [{ id: 'dummy' }];
 }
 
 export default function Page() {
