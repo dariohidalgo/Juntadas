@@ -1,0 +1,64 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp, getApps, getApp } from "firebase/app";
+// @ts-ignore
+import { initializeAuth, getReactNativePersistence, browserLocalPersistence, getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+
+// Polyfill localStorage for Native to avoid Firebase errors
+if (Platform.OS !== 'web') {
+    // @ts-ignore
+    global.localStorage = {
+        getItem: (key: string) => {
+            // We don't actually need it to work perfectly synchronously for Firebase Auth 
+            // if we use initializeAuth, but this prevents the crash.
+            return null;
+        },
+        setItem: () => { },
+        removeItem: () => { },
+    };
+}
+
+// Firebase project configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDRfs7x6HmWPGiSWCWz2LaTJKAqdvZ9AMc",
+    authDomain: "juntadas-73888.firebaseapp.com",
+    projectId: "juntadas-73888",
+    storageBucket: "juntadas-73888.firebasestorage.app",
+    messagingSenderId: "1028462492534",
+    appId: "1:1028462492534:web:22cc6f65b12ecdb4a79857",
+    measurementId: "G-L1KB03WYR7"
+};
+
+// Initialize Firebase
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+
+// Initialize Auth with platform-specific persistence
+let auth: any;
+
+if (Platform.OS === 'web') {
+    auth = getAuth(app);
+} else {
+    try {
+        auth = initializeAuth(app, {
+            persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+        });
+    } catch (e: any) {
+        if (e.code === 'auth/already-initialized') {
+            auth = getAuth(app);
+        } else {
+            console.error("Firebase Auth Init Error:", e);
+            // Fallback or rethrow if needed, but for now log it
+        }
+    }
+}
+
+const db = getFirestore(app);
+
+// Google Provider is not typically used with initializeAuth in this way for native,
+// but we keep it for now as we might need it for web fallback or different flow.
+import { GoogleAuthProvider } from "firebase/auth";
+const googleProvider = new GoogleAuthProvider();
+
+export { auth, db, googleProvider };
