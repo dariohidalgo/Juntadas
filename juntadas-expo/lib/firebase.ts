@@ -45,12 +45,9 @@ if (Platform.OS === 'web') {
             persistence: getReactNativePersistence(ReactNativeAsyncStorage)
         });
     } catch (e: any) {
-        if (e.code === 'auth/already-initialized') {
-            auth = getAuth(app);
-        } else {
-            console.error("Firebase Auth Init Error:", e);
-            // Fallback or rethrow if needed, but for now log it
-        }
+        console.error("Firebase Auth Init Error:", e);
+        // Fallback to getAuth to prevent crash, even if persistence might be compromised
+        auth = getAuth(app);
     }
 }
 
@@ -60,5 +57,6 @@ const db = getFirestore(app);
 // but we keep it for now as we might need it for web fallback or different flow.
 import { GoogleAuthProvider } from "firebase/auth";
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 export { auth, db, googleProvider };

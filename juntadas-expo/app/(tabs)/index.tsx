@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, Pressable, StyleSheet, Alert, Platform } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet, Alert, Platform, Modal, TouchableWithoutFeedback } from "react-native";
+import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useData } from "../../context/DataContext";
 import { useLang } from "../../context/LanguageContext";
@@ -13,6 +14,7 @@ export default function DashboardScreen() {
     const { t } = useLang();
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const [isMenuVisible, setIsMenuVisible] = useState(false);
 
     const handleLongPress = (group: any) => {
         Alert.alert(
@@ -32,6 +34,7 @@ export default function DashboardScreen() {
     };
 
     // Redirect if not authenticated (double check)
+    // Centralized redirection is now handled in AuthContext.tsx
     if (!user) {
         return (
             <View style={styles.loadingContainer}>
@@ -48,14 +51,69 @@ export default function DashboardScreen() {
             <StatusBar style="light" />
 
             <View style={styles.header}>
-                <View>
-                    <Text style={styles.welcomeText}>Hola, {user.displayName?.split(" ")[0] || "Usuario"}</Text>
-                    <Text style={styles.title}>{t("dashboard_title")}</Text>
-                </View>
-                <Pressable onPress={logout} style={styles.logoutButton}>
-                    <Text style={styles.logoutText}>Salir</Text>
+                <Pressable onPress={() => setIsMenuVisible(true)} style={styles.userSection}>
+                    <View style={styles.avatarContainer}>
+                        {user.photoURL ? (
+                            <View style={styles.avatarWrapper}>
+                                <Text style={styles.avatarPlaceholder}>{user.displayName?.[0] || "U"}</Text>
+                                <View style={styles.avatarImageContainer}>
+                                    {/* Using a View with background for now as a placeholder for the image if needed, 
+                                        but typically you'd use Image component. Let's stick to initials for speed and reliability */}
+                                    <Text style={styles.avatarInitial}>{user.displayName?.[0] || "U"}</Text>
+                                </View>
+                            </View>
+                        ) : (
+                            <View style={styles.avatarPlaceholderCircle}>
+                                <Text style={styles.avatarInitialText}>{user.displayName?.[0] || "U"}</Text>
+                            </View>
+                        )}
+                    </View>
+                    <View>
+                        <Text style={styles.welcomeText}>Hola, {user.displayName?.split(" ")[0] || "Usuario"}</Text>
+                        <Text style={styles.title}>{t("dashboard_title")}</Text>
+                    </View>
                 </Pressable>
             </View>
+
+            {/* Dropdown Menu Modal */}
+            <Modal
+                visible={isMenuVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsMenuVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setIsMenuVisible(false)}>
+                    <View style={styles.modalBackdrop}>
+                        <TouchableWithoutFeedback>
+                            <View style={[styles.menuDropdown, { top: insets.top + 70 }]}>
+                                <View style={styles.menuHeader}>
+                                    <View style={styles.menuAvatarSmall}>
+                                        <Text style={styles.menuAvatarText}>{user.displayName?.[0] || "U"}</Text>
+                                    </View>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.menuUserName} numberOfLines={1}>{user.displayName || "Usuario"}</Text>
+                                        <Text style={styles.menuUserEmail} numberOfLines={1} ellipsizeMode="tail">{user.email}</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.menuDivider} />
+                                <Pressable
+                                    onPress={() => {
+                                        setIsMenuVisible(false);
+                                        logout();
+                                    }}
+                                    style={({ pressed }) => [
+                                        styles.menuItem,
+                                        pressed && styles.menuItemPressed
+                                    ]}
+                                >
+                                    <Text style={styles.menuItemIcon}>🚪</Text>
+                                    <Text style={styles.menuItemText}>Cerrar Sesión</Text>
+                                </Pressable>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
 
             <ScrollView
                 style={styles.scrollView}
@@ -167,16 +225,151 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#ffffff",
     },
-    logoutButton: {
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
+    userSection: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    avatarContainer: {
+        marginRight: 12,
+    },
+    avatarPlaceholderCircle: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: "rgba(6, 182, 212, 0.2)",
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "rgba(6, 182, 212, 0.3)",
+    },
+    avatarInitialText: {
+        color: "#22d3ee",
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    avatarWrapper: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: "#1e293b",
+        justifyContent: "center",
+        alignItems: "center",
+        overflow: "hidden",
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.1)",
+    },
+    avatarPlaceholder: {
+        color: "#94a3b8",
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    avatarImageContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarInitial: {
+        color: "#22d3ee",
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    modalBackdrop: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.4)",
+    },
+    menuDropdown: {
+        position: "absolute",
+        right: 24,
+        width: 220,
+        maxWidth: 280,
+        backgroundColor: "#1e293b",
+        borderRadius: 16,
+        padding: 8,
+        overflow: "hidden",
+        ...Platform.select({
+            ios: {
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 10 },
+                shadowOpacity: 0.3,
+                shadowRadius: 20,
+            },
+            android: {
+                elevation: 10,
+            },
+        }),
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.1)",
+    },
+    menuHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 12,
+    },
+    menuAvatarSmall: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: "rgba(6, 182, 212, 0.2)",
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 10,
+    },
+    menuAvatarText: {
+        color: "#22d3ee",
+        fontSize: 14,
+        fontWeight: "bold",
+    },
+    menuUserName: {
+        color: "#ffffff",
+        fontSize: 14,
+        fontWeight: "600",
+        flexShrink: 1,
+    },
+    menuUserEmail: {
+        color: "#94a3b8",
+        fontSize: 12,
+        flexShrink: 1,
+    },
+    menuDivider: {
+        height: 1,
+        backgroundColor: "rgba(255, 255, 255, 0.05)",
+        marginVertical: 4,
+    },
+    menuItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 12,
         borderRadius: 8,
     },
+    menuItemPressed: {
+        backgroundColor: "rgba(255, 255, 255, 0.05)",
+    },
+    menuItemIcon: {
+        fontSize: 16,
+        marginRight: 12,
+    },
+    menuItemText: {
+        color: "#f1f5f9",
+        fontSize: 14,
+        fontWeight: "500",
+    },
+    logoutButton: {
+        backgroundColor: "rgba(239, 68, 68, 0.15)",
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "rgba(239, 68, 68, 0.3)",
+    },
     logoutText: {
-        color: "#cbd5e1",
-        fontSize: 12,
-        fontWeight: "600",
+        color: "#f87171",
+        fontSize: 13,
+        fontWeight: "700",
     },
     scrollView: {
         flex: 1,

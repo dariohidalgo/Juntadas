@@ -1,0 +1,10 @@
+# EAS build ignore file
+# Use .gitignore rules as a base, but explicitly exclude heavy folders
+# that EAS will install or generate on its own in the build server.
+
+node_modules/
+android/
+ios/
+.expo/
+web-build/
+dist/

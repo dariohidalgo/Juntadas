@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from "react-native";
+import { View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { useState } from "react";
 import { useData } from "../../../context/DataContext";
@@ -7,6 +7,8 @@ import { useLang } from "../../../context/LanguageContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import * as ImagePicker from 'expo-image-picker';
+import { processReceipt } from "../../../lib/ocrUtils";
 
 export default function NewExpenseScreen() {
     const router = useRouter();
@@ -22,6 +24,7 @@ export default function NewExpenseScreen() {
     const [amount, setAmount] = useState("");
     const [paidById, setPaidById] = useState(user?.uid || "");
     const [splitAmongIds, setSplitAmongIds] = useState<string[]>(group?.memberIds || []);
+    const [isScanning, setIsScanning] = useState(false);
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
@@ -42,6 +45,36 @@ export default function NewExpenseScreen() {
             setSplitAmongIds(splitAmongIds.filter(id => id !== memberId));
         } else {
             setSplitAmongIds([...splitAmongIds, memberId]);
+        }
+    };
+
+    const pickImage = async () => {
+        try {
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 1,
+            });
+
+            if (!result.canceled) {
+                setIsScanning(true);
+                try {
+                    const data = await processReceipt(result.assets[0].uri);
+                    if (data.amount) {
+                        setAmount(data.amount.toString());
+                    }
+                    if (data.text) {
+                        // Optional: Could try to set description, but let's keep it simple
+                    }
+                } catch (e) {
+                    alert("Error al leer el ticket. Intenta ingresarlo manualmente.");
+                } finally {
+                    setIsScanning(false);
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error al abrir la cámara");
         }
     };
 
@@ -83,6 +116,23 @@ export default function NewExpenseScreen() {
                         placeholderTextColor="#64748b"
                         keyboardType="decimal-pad"
                     />
+                    <Pressable
+                        onPress={pickImage}
+                        style={{
+                            position: 'absolute',
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            justifyContent: 'center',
+                            paddingHorizontal: 16
+                        }}
+                    >
+                        {isScanning ? (
+                            <ActivityIndicator color="#06b6d4" />
+                        ) : (
+                            <Text style={{ fontSize: 20 }}>📷</Text>
+                        )}
+                    </Pressable>
                 </View>
 
                 <View style={styles.inputGroup}>

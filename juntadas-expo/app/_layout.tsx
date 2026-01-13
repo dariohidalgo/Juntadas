@@ -12,6 +12,7 @@ LogBox.ignoreLogs([
     'props.pointerEvents is deprecated. Use style.pointerEvents',
 ]);
 
+
 export default function RootLayout() {
     return (
         <SafeAreaProvider>

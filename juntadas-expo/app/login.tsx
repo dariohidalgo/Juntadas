@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
+import { View, Text, Pressable, StyleSheet, Dimensions, Platform } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { useLang } from "../context/LanguageContext";
 import { useRouter } from "expo-router";
@@ -135,11 +135,20 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         borderRadius: 16,
         width: "100%",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-        elevation: 8,
+        ...Platform.select({
+            ios: {
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+            },
+            android: {
+                elevation: 8,
+            },
+            web: {
+                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.3)",
+            }
+        }),
         marginBottom: 24,
     },
     buttonPressed: {

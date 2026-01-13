@@ -9,7 +9,16 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDRfs7x6HmWPGiSWCWz2LaTJKAqdvZ9AMc",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "juntadas-73888.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "juntadas-73888",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "juntadas-73888.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "1028462492534",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:1028462492534:web:22cc6f65b12ecdb4a79857",
+        "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-L1KB03WYR7"
+      }
     },
     "production": {
       "autoIncrement": true
